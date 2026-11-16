@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -12,6 +13,12 @@
         .highlight { background: #e8f4fd; border-left: 4px solid #0056b3; padding: 15px; margin: 15px 0; border-radius: 0 8px 8px 0; }
         .mentor-box { background: #fdf6e3; border: 1px solid #f5deb3; padding: 15px; border-radius: 8px; font-size: 15px; line-height: 1.5; }
         .timestamp { font-size: 12px; color: #888; text-align: center; margin-top: 20px; }
+        
+        /* Estilos del nuevo botón interactivo */
+        .btn-aportar { background-color: #28a745; color: white; border: none; padding: 15px 20px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 8px; box-shadow: 0 4px 6px rgba(40,167,69,0.2);}
+        .btn-aportar:active { background-color: #218838; transform: translateY(2px); }
+        .historial-item { border-bottom: 1px solid #eee; padding: 12px 0; display: flex; justify-content: space-between; font-size: 15px; align-items: center; }
+        .borrar-btn { color: #dc3545; background: none; border: 1px solid #dc3545; border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer; font-weight: bold;}
     </style>
 </head>
 <body>
@@ -32,9 +39,18 @@
         </div>
     </div>
     
-    <div class="timestamp">Última actualización: <span id="fecha">--</span></div>
+    <!-- NUEVA SECCIÓN DE REGISTRO MANUAL -->
+    <div class="card">
+        <h2>💰 Mis Aportaciones</h2>
+        <p>Total invertido: <strong style="color: #28a745; font-size: 20px;"><span id="total-aportado">0</span> €</strong></p>
+        <button class="btn-aportar" onclick="registrarAportacion()">➕ Registrar Aportación Realizada</button>
+        <div id="lista-historial" style="margin-top: 15px; max-height: 200px; overflow-y: auto;"></div>
+    </div>
+    
+    <div class="timestamp">Última actualización de mercado: <span id="fecha">--</span></div>
 
     <script>
+        // 1. Cargar datos del mercado enviados desde Python
         fetch('datos.json?nocache=' + (new Date()).getTime())
             .then(response => response.json())
             .then(data => {
@@ -44,8 +60,53 @@
                 document.getElementById('perfil').innerText = data.estrategia.perfil;
                 document.getElementById('accion').innerText = data.mentor.accion;
                 document.getElementById('motivo').innerText = data.mentor.motivo;
+                
+                // Extraer el número exacto de la aportación para usarlo en el botón
+                window.cuantiaMensual = parseInt(data.estrategia.aportacion_mensual.replace(/[^0-9]/g, '')) || 150;
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => console.error('Error de red al cargar JSON:', error));
+
+        // 2. LÓGICA DE REGISTRO EN EL MÓVIL (LocalStorage)
+        let historial = JSON.parse(localStorage.getItem('historialTuAsesor')) || [];
+
+        function actualizarHistorial() {
+            const lista = document.getElementById('lista-historial');
+            const totalSpan = document.getElementById('total-aportado');
+            lista.innerHTML = '';
+            let total = 0;
+
+            historial.forEach((item, index) => {
+                total += item.cantidad;
+                lista.innerHTML += `
+                    <div class="historial-item">
+                        <span>🗓️ ${item.fecha} - <strong>${item.cantidad}€</strong></span>
+                        <button class="borrar-btn" onclick="borrarAportacion(${index})">Eliminar</button>
+                    </div>
+                `;
+            });
+            totalSpan.innerText = total.toLocaleString('es-ES');
+            localStorage.setItem('historialTuAsesor', JSON.stringify(historial));
+        }
+
+        function registrarAportacion() {
+            const cantidad = window.cuantiaMensual || 150;
+            
+            // Usamos formato europeo para la fecha
+            const fecha = new Date();
+            const opcionesFecha = { day: '2-digit', month: '2-digit', year: 'numeric' };
+            const fechaActual = fecha.toLocaleDateString('es-ES', opcionesFecha);
+            
+            historial.unshift({ fecha: fechaActual, cantidad: cantidad });
+            actualizarHistorial();
+        }
+
+        function borrarAportacion(index) {
+            historial.splice(index, 1);
+            actualizarHistorial();
+        }
+
+        // Cargar el historial guardado al abrir la app
+        actualizarHistorial();
     </script>
 </body>
 </html>
