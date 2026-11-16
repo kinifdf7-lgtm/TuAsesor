@@ -1,12 +1,12 @@
 {
-    "fecha_actualizacion": "16/11/2026 09:52",
+    "fecha_actualizacion": "16/11/2026 10:39",
     "estrategia": {
         "capital_inicial": "1000 \u20ac",
         "aportacion_mensual": "150 \u20ac",
-        "perfil": "70% Global / 30% Nasdaq"
+        "perfil": "50% Global / 25% Nasdaq / 25% Permanente"
     },
     "mentor": {
-        "accion": "Aportaci\u00f3n normal: 150\u20ac (70% Global / 30% Nasdaq)",
-        "motivo": "Tu cartera est\u00e1 equilibrada. Sigue tu plan autom\u00e1tico en MyInvestor aportando en tus porcentajes objetivo para mantener el equilibrio a largo plazo."
+        "accion": "Aportaci\u00f3n normal: 150\u20ac seg\u00fan perfil",
+        "motivo": "Tu cartera est\u00e1 perfectamente equilibrada a 3 bandas. Sigue aportando con normalidad en MyInvestor."
     }
 }
